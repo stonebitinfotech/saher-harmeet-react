@@ -1,0 +1,7 @@
+/* The full look of the site comes from /assets/css/styles.css (+ fonts.css),
+   loaded verbatim from index.html - nothing there was changed. This file only
+   makes the React #root wrapper transparent to layout, since the original
+   markup put <main> directly inside <body>. */
+#root {
+  display: contents;
+}
