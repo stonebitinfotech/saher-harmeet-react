@@ -75,7 +75,7 @@ export default function App() {
               evening of mehndi, music and lots of dancing to celebrate.
             </p>
             <p className="event-when">9th December 2026</p>
-            <p className="event-when">6:00 PM onwards</p>
+            <p className="event-when">5:00 PM onwards</p>
             <EventVenue href="https://maps.app.goo.gl/gb1doFZMG3kX9ugM9?g_st=ic">
               Rajhans Belizia, Dumas Road, Surat
             </EventVenue>

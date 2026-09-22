@@ -114,7 +114,7 @@ export const config = {
     {
       name: "Saher's Dhol & Heena Mehfil",
       date: "December 9",
-      time: "6:00 PM",
+      time: "5:00 PM",
       location: "Rajhans Belizia, Dumas Road, Surat",
       mapLink: "https://maps.app.goo.gl/gb1doFZMG3kX9ugM9?g_st=ic",
     },
