@@ -1,0 +1,373 @@
+/* Admin dashboard for personalized guest links (?g=1..10). Uses the same
+   theme variables as the invite (--plum, --champagne, --ivory, fonts) but
+   stays self-contained here rather than touching the ported styles.css. */
+
+.dash-page {
+  min-height: 100vh;
+  background: var(--ivory, #f1e3ce);
+  color: var(--plum, #3a070c);
+  font-family: var(--font-body);
+  padding: 2.5rem 1.25rem;
+}
+
+.dash-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-loading {
+  color: color-mix(in srgb, var(--plum) 50%, transparent);
+}
+
+.dash-shell {
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+.dash-card {
+  background: color-mix(in srgb, var(--ivory) 60%, #fff 40%);
+  border: 1px solid color-mix(in srgb, var(--plum) 15%, transparent);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.dash-login {
+  width: 100%;
+  max-width: 24rem;
+  box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--plum) 25%, transparent);
+}
+
+.dash-script-title {
+  font-family: var(--font-script);
+  color: var(--mauve, var(--plum));
+  font-size: 2.5rem;
+  line-height: 1;
+  text-align: center;
+  margin: 0 0 0.25rem;
+}
+
+.dash-subtitle {
+  font-size: 0.85rem;
+  text-align: center;
+  color: color-mix(in srgb, var(--plum) 65%, transparent);
+  margin: 0 0 1.5rem;
+}
+
+.dash-subtitle-left {
+  text-align: left;
+  margin-top: 0.25rem;
+}
+
+.dash-note {
+  font-size: 0.75rem;
+  color: var(--mauve, var(--plum));
+  background: color-mix(in srgb, var(--mauve) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mauve) 25%, transparent);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.dash-label {
+  display: block;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--plum) 70%, transparent);
+  margin-bottom: 0.25rem;
+}
+
+.dash-input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--plum) 18%, transparent);
+  background: #fff;
+  color: var(--plum);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  margin-bottom: 1rem;
+  outline: none;
+}
+
+.dash-input:focus {
+  border-color: var(--mauve, var(--plum));
+}
+
+.dash-error {
+  font-size: 0.85rem;
+  color: var(--mauve, var(--plum));
+  margin: 0 0 1rem;
+}
+
+.dash-btn {
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+}
+
+.dash-btn-block {
+  width: 100%;
+}
+
+.dash-btn-lg {
+  padding: 0.65rem 1.4rem;
+  font-size: 1rem;
+}
+
+.dash-btn-primary {
+  background: var(--plum);
+  color: var(--ivory, #f1e3ce);
+}
+
+.dash-btn-primary:hover {
+  background: color-mix(in srgb, var(--plum) 88%, #000 12%);
+}
+
+.dash-btn-saved {
+  background: color-mix(in srgb, var(--champagne) 70%, var(--plum) 30%);
+  color: var(--ivory, #f1e3ce);
+}
+
+.dash-btn-disabled {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--plum) 15%, transparent);
+  color: color-mix(in srgb, var(--plum) 35%, transparent);
+  cursor: default;
+}
+
+.dash-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dash-logout {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--plum) 55%, transparent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.dash-logout:hover {
+  color: var(--mauve, var(--plum));
+}
+
+.dash-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dash-row {
+  padding: 1rem;
+}
+
+.dash-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .dash-row-main {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.dash-row-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.dash-row-name .dash-input {
+  margin-bottom: 0;
+}
+
+.dash-slot-badge {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--plum);
+  color: var(--ivory, #f1e3ce);
+  font-weight: 600;
+}
+
+.dash-row-hide {
+  flex: 1;
+}
+
+.dash-row-save {
+  flex-shrink: 0;
+}
+
+.dash-row-url {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  font-size: 0.75rem;
+}
+
+.dash-row-url-label {
+  color: color-mix(in srgb, var(--plum) 40%, transparent);
+}
+
+.dash-link {
+  color: color-mix(in srgb, var(--mauve) 80%, var(--plum) 20%);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-link:hover {
+  color: var(--mauve, var(--plum));
+}
+
+.dash-copy-btn {
+  flex-shrink: 0;
+  border-radius: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--plum) 15%, transparent);
+  background: none;
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.dash-copy-btn:hover {
+  border-color: var(--mauve, var(--plum));
+  color: var(--mauve, var(--plum));
+}
+
+.dash-unsaved {
+  flex-shrink: 0;
+  color: var(--mauve, var(--plum));
+}
+
+.dash-unsaved-lg {
+  font-size: 0.9rem;
+}
+
+.dash-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.dash-footnote {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--plum) 40%, transparent);
+  margin-top: 1.5rem;
+}
+
+/* Hide-sections multi-select */
+
+.dash-hide-select {
+  position: relative;
+  width: 100%;
+}
+
+.dash-hide-summary {
+  list-style: none;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--plum) 18%, transparent);
+  background: #fff;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--plum) 85%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dash-hide-summary::-webkit-details-marker {
+  display: none;
+}
+
+.dash-hide-summary-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-hide-caret {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--plum) 40%, transparent);
+  transition: transform 0.15s;
+}
+
+details[open] > .dash-hide-summary .dash-hide-caret {
+  transform: rotate(180deg);
+}
+
+.dash-hide-panel {
+  position: absolute;
+  z-index: 10;
+  margin-top: 0.25rem;
+  width: 100%;
+  min-width: 14rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--plum) 18%, transparent);
+  background: #fff;
+  box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--plum) 30%, transparent);
+  padding: 0.5rem;
+}
+
+.dash-hide-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.dash-hide-option:hover {
+  background: color-mix(in srgb, var(--ivory) 70%, transparent);
+}
+
+.dash-hide-option input {
+  accent-color: var(--mauve, var(--plum));
+}
+
+.dash-hide-clear {
+  margin-top: 0.25rem;
+  width: 100%;
+  text-align: left;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--plum) 50%, transparent);
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.dash-hide-clear:hover {
+  color: var(--mauve, var(--plum));
+}

@@ -922,7 +922,11 @@ main {
 
 .event-venue a {
   display: inline-flex;
-  align-items: center;
+  /* flex-start (not center): when the address wraps to 2-3 lines on narrow
+     phones, the pin was never given its own flex line, so "center" measured
+     against the whole wrapped block and centered the icon over the middle
+     line instead of the first - making it look like it floats mid-sentence. */
+  align-items: flex-start;
   flex-wrap: wrap;
   justify-content: center;
   gap: 4px 7px;
@@ -941,6 +945,7 @@ main {
 .event-pin {
   flex-shrink: 0;
   color: var(--mauve);
+  margin-top: 2px;
 }
 
 .sunderkand-figure {
@@ -1067,6 +1072,48 @@ color-mix(in srgb, var(--lilac) 30%, transparent), transparent 29%), var(--ivory
   margin-top: 12px;
 }
 
+/* On narrow phones (<=375px) this copy block runs long enough to spill past
+   the reserved "blank arch" band and overlap the seated-women illustration
+   baked into mehndi-bg.png. Trim the text stack a little and push the
+   illustration's start further down to restore the gap - kept readable,
+   not shrunk to the smallest size that still technically fits. */
+@media (max-width: 375px) {
+  #mehndi.welcome-section {
+    padding-bottom: clamp(155px, 38vw, 205px);
+  }
+
+  #mehndi .event-card {
+    margin-top: 55px;
+  }
+
+  #mehndi .eyebrow {
+    font-size: .82rem;
+    margin-bottom: 0;
+  }
+
+  #mehndi .event-card h2 {
+    font-size: 1.55rem;
+    margin: 8px auto;
+  }
+
+  #mehndi .event-body {
+    font-size: .92rem;
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  #mehndi .event-when {
+    font-size: .98rem;
+    line-height: 1.45;
+    margin: 2px 0;
+  }
+
+  #mehndi .event-venue {
+    font-size: .88rem;
+    margin-top: 8px;
+  }
+}
+
 /* Haldi section fills with the marigold-haldi illustration; copy sits in the pale-yellow
    band above the seated couple. */
 #haldi.welcome-section {
@@ -1117,6 +1164,37 @@ color-mix(in srgb, var(--lilac) 30%, transparent), transparent 29%), var(--ivory
   font-size: .72rem;
   line-height: 1.22;
   margin-top: 5px;
+}
+
+/* This address is the longest of the four venue lines, so it needs the
+   biggest buffer bump of the group. */
+@media (max-width: 375px) {
+  #haldi.welcome-section {
+    padding-bottom: clamp(172px, 42vw, 210px);
+  }
+
+  #haldi .event-card h2 {
+    font-size: 1.2rem;
+    margin: 0 0 6px;
+  }
+
+  #haldi .event-body {
+    font-size: .68rem;
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+
+  #haldi .event-when {
+    font-size: .76rem;
+    line-height: 1.2;
+    margin: 2px 0;
+  }
+
+  #haldi .event-venue {
+    font-size: .63rem;
+    line-height: 1.2;
+    margin-top: 6px;
+  }
 }
 
 /* Starry Night fills the section with the night-terrace photo; light maroon scrim keeps text legible */
@@ -1183,6 +1261,42 @@ color-mix(in srgb, var(--lilac) 30%, transparent), transparent 29%), var(--ivory
 
 #starry .event-pin {
   color: var(--champagne);
+}
+
+/* On narrow phones the address line wraps onto an extra row, pushing the
+   card past the safe zone the Starry-Night.jpeg art was drawn for and
+   overlapping the couple/dessert-tower graphic at the bottom. Text stays
+   close to the base size here - only the heading and body come down a
+   touch, with extra section height doing most of the work. */
+@media (max-width: 375px) {
+  #starry.welcome-section {
+    min-height: min(200vw, 780px);
+  }
+
+  #starry .event-card h2 {
+    font-size: 2rem;
+    margin: 8px 0;
+  }
+
+  #starry .event-lead {
+    font-size: .86rem;
+  }
+
+  #starry .event-body {
+    font-size: .94rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  #starry .event-when {
+    font-size: 1rem;
+    line-height: 1.42;
+    margin: 2px 0;
+  }
+
+  #starry .event-venue {
+    font-size: .86rem;
+  }
 }
 
 .signature, .closing-names {
