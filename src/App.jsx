@@ -149,7 +149,7 @@ export default function App() {
                 swatches={[
                   { color: "#1F4FA3", label: "Blue" },
                   { color: "#C2C6CE", label: "Silver" },
-                  { color: "#B87333", label: "Copper" },
+                  { color: "#C41E3A", label: "Red" },
                   { color: "#151515", label: "Black" },
                   { color: "#0E8A5F", label: "Emerald Green" },
                 ]}
