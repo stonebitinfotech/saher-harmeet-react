@@ -141,7 +141,7 @@ export default function Hero() {
               <small>{config.couple.bride.parents}</small>
             </div>
 
-            <span className="name-ampersand">&amp;</span>
+            <span className="name-ampersand">With</span>
 
             <div>
               <h1 id="groomName">

@@ -52,7 +52,7 @@ export default function App() {
             </EventVenue>
           </EventSection>
 
-          <AttireNote>Attire: Traditional &amp; Modest</AttireNote>
+          <AttireNote>Attire: Traditional</AttireNote>
         </>
       ),
     },
@@ -81,7 +81,7 @@ export default function App() {
             </EventVenue>
           </EventSection>
 
-          <AttireNote>Attire: Pastels &amp; Comfortable Ethnic Wear</AttireNote>
+          <AttireNote>Attire: Comfortable Ethnic Wear</AttireNote>
         </>
       ),
     },
@@ -145,11 +145,11 @@ export default function App() {
 
               <DressTheme
                 title="Modern Bollywood Glam"
-                sub="Blue · Silver · Copper · Black · Emerald Green"
+                sub="Blue · Silver · Red · Black · Emerald Green"
                 swatches={[
                   { color: "#1F4FA3", label: "Blue" },
                   { color: "#C2C6CE", label: "Silver" },
-                  { color: "#B87333", label: "Copper" },
+                  { color: "#C41E3A", label: "Red" },
                   { color: "#151515", label: "Black" },
                   { color: "#0E8A5F", label: "Emerald Green" },
                 ]}
