@@ -144,7 +144,7 @@ export default function Hero() {
             {/* The connector between the two names reads "With" (client copy),
                 so it's sized down from the big "&" glyph this class was
                 built for - inline so it also beats the wider-screen override. */}
-            <span className="name-ampersand" style={{ fontSize: "1.5rem" }}>
+            <span className="name-ampersand" style={{ fontSize: "14px" }}>
               With
             </span>
 
