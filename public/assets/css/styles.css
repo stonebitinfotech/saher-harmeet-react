@@ -825,7 +825,7 @@ main {
 
 .attire-note {
   margin: 0;
-  padding: 11px 0px 20px 0px;  
+  padding: 11px 0px 20px 0px;
   text-align: center;
   font-family: var(--font-display);
   font-style: italic;
@@ -833,6 +833,17 @@ main {
   color: var(--mauve);
   position: relative;
   z-index: 1;
+}
+
+/* The FloralDivider that follows every section straddles the section
+   boundary and grows with viewport width (its img is sized in vw), so on
+   phones its top half can grow tall enough to sit over this note's text.
+   Scale the bottom padding along with it so there's always clear air
+   between the sentence and the garland below it. */
+@media (max-width: 480px) {
+  .attire-note {
+    padding-bottom: clamp(36px, 11vw, 78px);
+  }
 }
 
 /* Per-event dress theme: theme name, colour line and swatch chips (replaces .attire-note on themed events) */
@@ -1072,45 +1083,64 @@ color-mix(in srgb, var(--lilac) 30%, transparent), transparent 29%), var(--ivory
   margin-top: 12px;
 }
 
-/* On narrow phones (<=375px) this copy block runs long enough to spill past
+/* On narrow phones (<=480px) this copy block runs long enough to spill past
    the reserved "blank arch" band and overlap the seated-women illustration
-   baked into mehndi-bg.png. Trim the text stack a little and push the
-   illustration's start further down to restore the gap - kept readable,
-   not shrunk to the smallest size that still technically fits. */
-@media (max-width: 375px) {
+   baked into mehndi-bg.png - same underlying issue as #haldi below: the
+   copy is fixed-size (rem) while the illustration scales with viewport
+   width, so the narrower the phone, the sooner the women's heads arrive.
+   The old 55px card margin-top alone ate most of the safe band, so it's
+   cut way down here, the text stack is trimmed further, and min-height is
+   raised to push the illustration's safe band down enough to clear it. */
+@media (max-width: 480px) {
   #mehndi.welcome-section {
+    min-height: min(196vw, 675px);
+    padding-top: 90px;
     padding-bottom: clamp(155px, 38vw, 205px);
   }
 
   #mehndi .event-card {
-    margin-top: 55px;
+    margin-top: 20px;
   }
 
   #mehndi .eyebrow {
-    font-size: .82rem;
+    font-size: .68rem;
+    line-height: 1.35;
     margin-bottom: 0;
   }
 
+  #mehndi .event-lead {
+    margin-top: 3px;
+    font-size: .78rem;
+  }
+
   #mehndi .event-card h2 {
-    font-size: 1.55rem;
+    font-size: 1.3rem;
+    line-height: 1.18;
     margin: 8px auto;
+    max-width: 235px;
+  }
+
+  #mehndi .event-card .ornament {
+    margin-bottom: 8px;
   }
 
   #mehndi .event-body {
-    font-size: .92rem;
-    line-height: 1.55;
+    max-width: 250px;
+    font-size: .72rem;
+    line-height: 1.35;
     margin-bottom: 8px;
   }
 
   #mehndi .event-when {
-    font-size: .98rem;
-    line-height: 1.45;
+    font-size: .78rem;
+    line-height: 1.25;
     margin: 2px 0;
   }
 
   #mehndi .event-venue {
-    font-size: .88rem;
-    margin-top: 8px;
+    font-size: .68rem;
+    line-height: 1.2;
+    margin-top: 6px;
   }
 }
 
@@ -1167,33 +1197,51 @@ color-mix(in srgb, var(--lilac) 30%, transparent), transparent 29%), var(--ivory
 }
 
 /* This address is the longest of the four venue lines, so it needs the
-   biggest buffer bump of the group. */
-@media (max-width: 375px) {
+   biggest buffer bump of the group. The copy block is fixed-size (rem, not
+   vw) below 480px, while the couple photo baked into haldi-bgd.png scales
+   down with viewport width - so the narrower the phone, the higher up the
+   couple's heads sit relative to the text. Taller min-height pushes the
+   whole illustration (and the safe band above the couple) further down to
+   compensate, and the fonts/margins are trimmed on top of that so the
+   copy block itself is short enough to clear the couple even at 320px. */
+@media (max-width: 480px) {
   #haldi.welcome-section {
+    min-height: min(220vw, 780px);
+    padding-top: 40px;
     padding-bottom: clamp(172px, 42vw, 210px);
   }
 
+  #haldi .event-card {
+    max-width: 250px;
+  }
+
   #haldi .event-card h2 {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
+    line-height: 1.15;
     margin: 0 0 6px;
   }
 
+  #haldi .event-card .ornament {
+    margin-bottom: 6px;
+  }
+
   #haldi .event-body {
-    font-size: .68rem;
+    max-width: 220px;
+    font-size: .64rem;
     line-height: 1.25;
     margin-bottom: 6px;
   }
 
   #haldi .event-when {
-    font-size: .76rem;
-    line-height: 1.2;
-    margin: 2px 0;
+    font-size: .7rem;
+    line-height: 1.15;
+    margin: 1px 0;
   }
 
   #haldi .event-venue {
-    font-size: .63rem;
-    line-height: 1.2;
-    margin-top: 6px;
+    font-size: .6rem;
+    line-height: 1.15;
+    margin-top: 5px;
   }
 }
 
@@ -1270,32 +1318,32 @@ color-mix(in srgb, var(--lilac) 30%, transparent), transparent 29%), var(--ivory
    touch, with extra section height doing most of the work. */
 @media (max-width: 375px) {
   #starry.welcome-section {
-    min-height: min(200vw, 780px);
+    min-height: min(238vw, 840px);
   }
 
   #starry .event-card h2 {
-    font-size: 2rem;
-    margin: 8px 0;
+    font-size: 1.9rem;
+    margin: 6px 0 8px;
   }
 
   #starry .event-lead {
-    font-size: .86rem;
+    font-size: .84rem;
   }
 
   #starry .event-body {
-    font-size: .94rem;
-    line-height: 1.5;
-    margin-bottom: 12px;
+    font-size: .88rem;
+    line-height: 1.42;
+    margin-bottom: 10px;
   }
 
   #starry .event-when {
-    font-size: 1rem;
-    line-height: 1.42;
+    font-size: .92rem;
+    line-height: 1.35;
     margin: 2px 0;
   }
 
   #starry .event-venue {
-    font-size: .86rem;
+    font-size: .76rem;
   }
 }
 
