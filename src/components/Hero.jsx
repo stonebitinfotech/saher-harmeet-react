@@ -141,7 +141,12 @@ export default function Hero() {
               <small>{config.couple.bride.parents}</small>
             </div>
 
-            <span className="name-ampersand">With</span>
+            {/* The connector between the two names reads "With" (client copy),
+                so it's sized down from the big "&" glyph this class was
+                built for - inline so it also beats the wider-screen override. */}
+            <span className="name-ampersand" style={{ fontSize: "1.5rem" }}>
+              With
+            </span>
 
             <div>
               <h1 id="groomName">
