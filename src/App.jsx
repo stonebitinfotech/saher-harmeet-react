@@ -19,8 +19,8 @@ import Closing from "./components/Closing.jsx";
 export default function App() {
   useThemeVars(config.theme);
   useAntiCopy();
-  useReveal();
   const { hidden, ready } = useLinkConfig();
+  useReveal(ready);
   const show = (key) => !hidden.has(key);
 
   useEffect(() => {

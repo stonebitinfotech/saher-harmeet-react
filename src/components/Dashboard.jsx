@@ -46,8 +46,12 @@ function readCreds() {
   return null;
 }
 
+// Guest links are plain paths (/1 .. /10). The old ?g=N form still opens the
+// same slot (see useLinkConfig.readSlot), so links already shared keep working.
+// A bare /N path needs the host to serve index.html for unknown paths - see the
+// SPA fallback for this site in deploy/nginx-invitesmagic.conf.
 function urlFor(n) {
-  return `${window.location.origin}${import.meta.env.BASE_URL}?g=${n}`;
+  return `${window.location.origin}${import.meta.env.BASE_URL}${n}`;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -286,7 +290,7 @@ function Editor({ creds, onAuthLost }) {
                     <input
                       value={slot.name}
                       onChange={(e) => setName(n, e.target.value)}
-                      placeholder={`Name for link ?g=${n} (e.g. Sharma Family)`}
+                      placeholder={`Name for link /${n} (e.g. Sharma Family)`}
                       maxLength={60}
                       className="dash-input"
                     />
