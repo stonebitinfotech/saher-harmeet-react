@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { isSectionKey } from "../config/sections";
-
-const STORAGE_KEY = "sh-link-config";
+import { fetchSavedConfig, fetchStaticConfig } from "../lib/linkConfigApi";
 
 // Read the guest slot from the URL: ?g=1 (works anywhere) or a bare /1 path
 // (works once the host rewrites unknown paths to index.html).
@@ -19,36 +18,31 @@ function readSlot() {
   return null;
 }
 
-// Unsaved/saved dashboard edits live in localStorage on the admin's browser so
-// they can preview before publishing. Guests never have this key.
-function fromStorage(slot) {
+// What the dashboard saved on the server, so every guest on every device sees
+// the same thing. Falls back to the defaults in /link-config.json when nothing
+// has been saved yet or the server can't be reached.
+async function loadConfig() {
   try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-    const keys = data?.slots?.[slot]?.hidden;
-    if (Array.isArray(keys)) return new Set(keys.filter(isSectionKey));
+    const saved = await fetchSavedConfig();
+    if (saved) return saved;
   } catch {
-    /* ignore */
+    /* use the defaults below */
   }
-  return null;
+  return fetchStaticConfig();
 }
 
 // Resolves which section keys are hidden for the current guest slot. No slot =>
-// nothing hidden. Prefers this browser's dashboard edits, else /link-config.json.
+// nothing hidden.
 export function useLinkConfig() {
   const [slot] = useState(readSlot);
-  const [hidden, setHidden] = useState(() =>
-    slot === null ? new Set() : fromStorage(slot) ?? new Set(),
-  );
-  const [ready, setReady] = useState(
-    () => slot === null || fromStorage(slot) !== null,
-  );
+  const [hidden, setHidden] = useState(() => new Set());
+  const [ready, setReady] = useState(() => slot === null);
 
   useEffect(() => {
-    if (slot === null || fromStorage(slot) !== null) return;
+    if (slot === null) return;
     let cancelled = false;
 
-    fetch(`${import.meta.env.BASE_URL}link-config.json`, { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
+    loadConfig()
       .then((data) => {
         if (cancelled) return;
         const keys = data?.slots?.[slot]?.hidden;

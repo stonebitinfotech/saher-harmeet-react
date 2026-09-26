@@ -2,12 +2,18 @@ import { useEffect, useState } from "react";
 import { config } from "../config.js";
 import { useThemeVars } from "../hooks/useThemeVars.js";
 import { SECTIONS, SLOT_NUMBERS, isSectionKey } from "../config/sections";
+import {
+  ERROR_TEXT,
+  fetchSavedConfig,
+  fetchStaticConfig,
+  saveLinkConfig,
+  verifyLogin,
+} from "../lib/linkConfigApi";
 import "./Dashboard.css";
 
+// Login is checked by the server (deploy/link-config-api), not in this bundle.
+// The credentials that passed are kept for this tab only, to sign each save.
 const AUTH_KEY = "sh-dashboard-auth";
-const STORAGE_KEY = "sh-link-config";
-const ENV_USER = import.meta.env.VITE_DASHBOARD_USER;
-const ENV_PASS = import.meta.env.VITE_DASHBOARD_PASSWORD;
 
 function emptyConfig() {
   const slots = {};
@@ -30,19 +36,10 @@ function normalize(data) {
   return base;
 }
 
-function persist(cfg) {
+function readCreds() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function storedConfig() {
-  try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-    if (data && data.slots) return normalize(data);
+    const c = JSON.parse(sessionStorage.getItem(AUTH_KEY) || "null");
+    if (c && typeof c.user === "string" && typeof c.password === "string") return c;
   } catch {
     /* ignore */
   }
@@ -58,43 +55,50 @@ function urlFor(n) {
 export default function Dashboard() {
   useThemeVars(config.theme);
 
-  const [authed, setAuthed] = useState(() => {
-    try {
-      return sessionStorage.getItem(AUTH_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [creds, setCreds] = useState(readCreds);
+  const [notice, setNotice] = useState("");
 
-  if (!authed) return <Login onSuccess={() => setAuthed(true)} />;
-  return <Editor />;
+  function signIn(c) {
+    try {
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(c));
+    } catch {
+      /* ignore */
+    }
+    setNotice("");
+    setCreds(c);
+  }
+
+  // The server stopped accepting these credentials (e.g. the password changed).
+  function authLost() {
+    try {
+      sessionStorage.removeItem(AUTH_KEY);
+    } catch {
+      /* ignore */
+    }
+    setNotice("Your login is no longer valid. Please sign in again.");
+    setCreds(null);
+  }
+
+  if (!creds) return <Login onSuccess={signIn} notice={notice} />;
+  return <Editor creds={creds} onAuthLost={authLost} />;
 }
 
 /* -------------------------------- Login ---------------------------------- */
 
-function Login({ onSuccess }) {
+function Login({ onSuccess, notice }) {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const envMissing = !ENV_USER || !ENV_PASS;
-
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    if (envMissing) {
-      setError("Login is not configured. Set VITE_DASHBOARD_USER and VITE_DASHBOARD_PASSWORD in .env.local, then restart.");
-      return;
-    }
-    if (user === ENV_USER && pass === ENV_PASS) {
-      try {
-        sessionStorage.setItem(AUTH_KEY, "1");
-      } catch {
-        /* ignore */
-      }
-      onSuccess();
-    } else {
-      setError("Wrong username or password.");
-    }
+    setBusy(true);
+    setError("");
+    const result = await verifyLogin(user, pass);
+    setBusy(false);
+    if (result === "ok") onSuccess({ user, password: pass });
+    else setError(ERROR_TEXT[result]);
   }
 
   return (
@@ -102,14 +106,6 @@ function Login({ onSuccess }) {
       <form onSubmit={submit} className="dash-card dash-login">
         <h1 className="dash-script-title">Dashboard</h1>
         <p className="dash-subtitle">Saher &amp; Harmeet &middot; guest link settings</p>
-
-        {envMissing && (
-          <p className="dash-note">
-            <b>Not configured.</b> Add <code>VITE_DASHBOARD_USER</code> and{" "}
-            <code>VITE_DASHBOARD_PASSWORD</code> to <code>.env.local</code> and restart the dev
-            server / rebuild.
-          </p>
-        )}
 
         <label className="dash-label">Username</label>
         <input
@@ -128,10 +124,10 @@ function Login({ onSuccess }) {
           className="dash-input"
         />
 
-        {error && <p className="dash-error">{error}</p>}
+        {(error || notice) && <p className="dash-error">{error || notice}</p>}
 
-        <button type="submit" className="dash-btn dash-btn-primary dash-btn-block">
-          Open dashboard
+        <button type="submit" disabled={busy} className="dash-btn dash-btn-primary dash-btn-block">
+          {busy ? "Checking…" : "Open dashboard"}
         </button>
       </form>
     </div>
@@ -140,19 +136,22 @@ function Login({ onSuccess }) {
 
 /* -------------------------------- Editor --------------------------------- */
 
-function Editor() {
-  const [config, setConfig] = useState(storedConfig);
-  const [savedConfig, setSavedConfig] = useState(storedConfig);
+function Editor({ creds, onAuthLost }) {
+  const [config, setConfig] = useState(null);
+  const [savedConfig, setSavedConfig] = useState(null);
   const [loadError, setLoadError] = useState("");
+  const [saveError, setSaveError] = useState("");
   const [copiedUrl, setCopiedUrl] = useState(null);
   const [flashId, setFlashId] = useState(null); // slot number, or "all"
+  const [savingId, setSavingId] = useState(null); // slot number, or "all"
 
   useEffect(() => {
-    if (config !== null) return; // already loaded from this browser's saved edits
     let cancelled = false;
 
-    fetch(`${import.meta.env.BASE_URL}link-config.json`, { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not found"))))
+    // What's saved on the server; if nothing has been saved yet, the defaults
+    // checked into the repo.
+    fetchSavedConfig()
+      .then((saved) => saved ?? fetchStaticConfig())
       .then((data) => {
         if (cancelled) return;
         const c = normalize(data);
@@ -164,13 +163,14 @@ function Editor() {
         const c = emptyConfig();
         setConfig(c);
         setSavedConfig(c);
-        setLoadError("Could not load the current link-config.json - starting from a blank set.");
+        setLoadError(
+          "Could not load the saved settings from the server. Reload the page before saving, or you may overwrite them.",
+        );
       });
 
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const slotDirty = (n) =>
@@ -209,20 +209,28 @@ function Editor() {
     }));
   }
 
+  // Sends the whole config to the server; guests see it on their next load.
+  async function commit(next, id) {
+    setSavingId(id);
+    setSaveError("");
+    const result = await saveLinkConfig(creds, next);
+    setSavingId(null);
+    if (result === "ok") {
+      setSavedConfig(next);
+      flash(id);
+    } else if (result === "unauthorized") {
+      onAuthLost();
+    } else {
+      setSaveError(`Not saved. ${ERROR_TEXT[result]}`);
+    }
+  }
+
   function saveSlot(n) {
-    const next = {
-      ...savedConfig,
-      slots: { ...savedConfig.slots, [n]: config.slots[n] },
-    };
-    persist(next);
-    setSavedConfig(next);
-    flash(n);
+    commit({ ...savedConfig, slots: { ...savedConfig.slots, [n]: config.slots[n] } }, n);
   }
 
   function saveAll() {
-    persist(config);
-    setSavedConfig(config);
-    flash("all");
+    commit(config, "all");
   }
 
   async function copyUrl(n) {
@@ -263,7 +271,7 @@ function Editor() {
           </button>
         </header>
 
-        {loadError && <p className="dash-note">{loadError}</p>}
+        {(loadError || saveError) && <p className="dash-note">{saveError || loadError}</p>}
 
         <div className="dash-rows">
           {SLOT_NUMBERS.map((n) => {
@@ -279,6 +287,7 @@ function Editor() {
                       value={slot.name}
                       onChange={(e) => setName(n, e.target.value)}
                       placeholder={`Name for link ?g=${n} (e.g. Sharma Family)`}
+                      maxLength={60}
                       className="dash-input"
                     />
                   </div>
@@ -293,7 +302,7 @@ function Editor() {
 
                   <button
                     onClick={() => saveSlot(n)}
-                    disabled={!dirty && flashId !== n}
+                    disabled={savingId !== null || (!dirty && flashId !== n)}
                     className={
                       "dash-btn dash-row-save " +
                       (flashId === n
@@ -303,7 +312,7 @@ function Editor() {
                           : "dash-btn-disabled")
                     }
                   >
-                    {flashId === n ? "Saved ✓" : "Save"}
+                    {savingId === n ? "Saving…" : flashId === n ? "Saved ✓" : "Save"}
                   </button>
                 </div>
 
@@ -325,7 +334,7 @@ function Editor() {
         <div className="dash-footer-actions">
           <button
             onClick={saveAll}
-            disabled={!anyDirty && flashId !== "all"}
+            disabled={savingId !== null || (!anyDirty && flashId !== "all")}
             className={
               "dash-btn dash-btn-lg " +
               (flashId === "all"
@@ -335,14 +344,13 @@ function Editor() {
                   : "dash-btn-disabled")
             }
           >
-            {flashId === "all" ? "All saved ✓" : "Save all"}
+            {savingId === "all" ? "Saving…" : flashId === "all" ? "All saved ✓" : "Save all"}
           </button>
           {anyDirty && <span className="dash-unsaved dash-unsaved-lg">You have unsaved changes</span>}
         </div>
 
         <p className="dash-footnote">
-          Plain <code>/1</code>…<code>/10</code> URLs also work once the host is set to serve{" "}
-          <code>index.html</code> for unknown paths.
+          Saving updates the live guest links straight away, on every device - no redeploy needed.
         </p>
       </div>
     </div>
